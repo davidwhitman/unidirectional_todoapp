@@ -5,7 +5,10 @@ import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.Transformations
+import io.reactivex.Completable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * @author Thundercloud Dev on 12/8/2017.
@@ -40,7 +43,13 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private fun middleware(action: Action): LiveData<Action> {
         return when (action) {
             is Actions.TodoList.GetTodoList -> ActionCreator
-                    .apply { value = Actions.TodoList.GotTodoList(items.values.toList()) }
+                    .apply {
+                        Completable.timer(1, TimeUnit.SECONDS)
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe {
+                                    value = Actions.TodoList.GotTodoList(items.values.toList())
+                                }
+                    }
             is Actions.TodoList.UpdateTodoItem -> ActionCreator
                     .apply {
                         items.put(action.key, TodoItem(key = action.key, name = action.name))

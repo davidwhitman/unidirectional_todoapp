@@ -10,15 +10,22 @@
             android:id="@+id/home_newItem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="New item..."
             android:imeOptions="actionDone"
-            android:maxLines="1"
             android:inputType="text"
-            android:hint="New item..." />
+            android:maxLines="1" />
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/home_todoList"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/home_loading"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="@dimen/spacingSmall_half" />
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/home_todoList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/spacingSmall_half" />
+
+        </android.support.v4.widget.SwipeRefreshLayout>
     </LinearLayout>
 </layout>

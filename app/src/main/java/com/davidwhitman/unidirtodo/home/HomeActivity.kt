@@ -38,11 +38,14 @@ class HomeActivity : AppCompatActivity() {
         binding.homeNewItem.setOnEditorActionListener { editText, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 ActionCreator.dispatch(Actions.TodoList.UpdateTodoItem(name = editText.text.toString()))
+                editText.text = ""
                 true
             } else {
                 false
             }
         }
+
+        binding.homeLoading.setOnRefreshListener { ActionCreator.dispatch(Actions.TodoList.GetTodoList()) }
 
         ActionCreator.dispatch(Actions.TodoList.GetTodoList())
     }
@@ -55,13 +58,16 @@ class HomeActivity : AppCompatActivity() {
 
     private fun renderUi(newState: HomeState?) {
         when (newState) {
-            is HomeState.Loading -> {
-            }
+            is HomeState.Loading -> binding.homeLoading.isRefreshing = true
             is HomeState.Loaded -> {
                 adapter.clear()
                 adapter.addAll(newState.items)
+                binding.homeLoading.isRefreshing = false
             }
-            is HomeState.Empty -> adapter.clear()
+            is HomeState.Empty -> {
+                adapter.clear()
+                binding.homeLoading.isRefreshing = false
+            }
         }
     }
 }
