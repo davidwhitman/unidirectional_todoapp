@@ -37,7 +37,7 @@ class HomeActivity : AppCompatActivity() {
 
         binding.homeNewItem.setOnEditorActionListener { editText, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                ActionCreator.dispatch(Actions.TodoList.UpdateTodoItem(name = editText.text.toString()))
+                ActionEmitter.dispatch(Actions.TodoList.UpdateTodoItem(name = editText.text.toString()))
                 editText.text = ""
                 true
             } else {
@@ -45,9 +45,9 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        binding.homeLoading.setOnRefreshListener { ActionCreator.dispatch(Actions.TodoList.GetTodoList()) }
+        binding.homeLoading.setOnRefreshListener { ActionEmitter.dispatch(Actions.TodoList.GetTodoList()) }
 
-        ActionCreator.dispatch(Actions.TodoList.GetTodoList())
+        ActionEmitter.dispatch(Actions.TodoList.GetTodoList())
     }
 
     private fun subscribeUiToData(viewModel: HomeViewModel) {

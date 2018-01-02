@@ -22,13 +22,13 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             TodoItem(Random().nextLong(), name = "Matar Paneer"),
             TodoItem(Random().nextLong(), name = "Greek Yogurt"))
 
-    private val items = hardcodedItems.map { it.key to it }.toMap().toMutableMap()
+    private val items: MutableMap<Long, TodoItem>
 
-    val state: LiveData<HomeState> = Transformations.switchMap(ActionCreator) {
+    val state: LiveData<HomeState> = Transformations.switchMap(ActionEmitter, { action ->
         MediatorLiveData<HomeState>().apply {
-            addSource(middleware(it)) {
-                it?.let {
-                    val newState = homeStateReducer(it, currentState)
+            addSource(middleware(action), {
+                action?.let {
+                    val newState = homeStateReducer(action, currentState)
 
                     if (newState != currentState) {
                         currentState = newState
@@ -36,30 +36,33 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                         value = newState
                     }
                 }
-            }
+            })
         }
+    })
+
+    init {
+        items = hardcodedItems.map { it.key to it }.toMap().toMutableMap()
     }
 
     private fun middleware(action: Action): LiveData<Action> {
-        return when (action) {
-            is Actions.TodoList.GetTodoList -> ActionCreator
-                    .apply {
-                        Completable.timer(1, TimeUnit.SECONDS)
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe {
-                                    value = Actions.TodoList.GotTodoList(items.values.toList())
-                                }
-                    }
-            is Actions.TodoList.UpdateTodoItem -> ActionCreator
-                    .apply {
-                        items.put(action.key, TodoItem(key = action.key, name = action.name))
-                        ActionCreator.dispatch(Actions.TodoList.GetTodoList())
-                    }
-            else -> ActionCreator
+        when (action) {
+            is Actions.TodoList.GetTodoList -> {
+                Completable.timer(1, TimeUnit.SECONDS)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            ActionEmitter.dispatch(Actions.TodoList.GotTodoList(items.values.toList()))
+                        }
+            }
+            is Actions.TodoList.UpdateTodoItem -> {
+                items.put(action.key, TodoItem(key = action.key, name = action.name))
+                ActionEmitter.dispatch(Actions.TodoList.GetTodoList())
+            }
         }
+
+        return ActionEmitter
     }
 
-    private fun homeStateReducer(action: Action, currentState: HomeState) =
+    private fun homeStateReducer(action: Action, currentState: HomeState): HomeState =
             when (action) {
                 is Actions.TodoList.GetTodoList -> HomeState.Loading()
                 is Actions.TodoList.GotTodoList -> HomeState.Loaded(action.todoList)

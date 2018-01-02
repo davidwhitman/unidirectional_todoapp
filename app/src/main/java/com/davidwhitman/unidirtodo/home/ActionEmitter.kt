@@ -6,7 +6,7 @@ import java.util.*
 /**
  * @author Thundercloud Dev on 12/8/2017.
  */
-object ActionCreator : MutableLiveData<Action>() {
+object ActionEmitter : MutableLiveData<Action>() {
     fun dispatch(action: Action) {
         value = action
     }
