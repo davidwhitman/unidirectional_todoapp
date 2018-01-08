@@ -8,6 +8,9 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.inputmethod.EditorInfo
 import com.davidwhitman.unidirtodo.R
 import com.davidwhitman.unidirtodo.databinding.HomeBinding
+import com.davidwhitman.unidirtodo.home.business.ActionEmitter
+import com.davidwhitman.unidirtodo.home.business.Actions
+import com.davidwhitman.unidirtodo.home.business.HomeViewModel
 import com.nextfaze.poweradapters.binder
 import com.nextfaze.poweradapters.binding.ListBindingAdapter
 import com.nextfaze.poweradapters.recyclerview.toRecyclerAdapter
@@ -37,7 +40,7 @@ class HomeActivity : AppCompatActivity() {
 
         binding.homeNewItem.setOnEditorActionListener { editText, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                ActionEmitter.dispatch(Actions.TodoList.UpdateTodoItem(name = editText.text.toString()))
+                viewModel.dispatch(HomeViewModel.TodoUiAction.UpdateTodoItem(name = editText.text.toString()))
                 editText.text = ""
                 true
             } else {
@@ -45,9 +48,9 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        binding.homeLoading.setOnRefreshListener { ActionEmitter.dispatch(Actions.TodoList.GetTodoList()) }
+        binding.homeLoading.setOnRefreshListener { viewModel.dispatch(HomeViewModel.TodoUiAction.OnRefresh()) }
 
-        ActionEmitter.dispatch(Actions.TodoList.GetTodoList())
+        viewModel.dispatch(HomeViewModel.TodoUiAction.OnLoad())
     }
 
     private fun subscribeUiToData(viewModel: HomeViewModel) {
