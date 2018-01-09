@@ -4,15 +4,15 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.util.DiffUtil
 import android.support.v7.widget.LinearLayoutManager
 import android.view.inputmethod.EditorInfo
 import com.davidwhitman.unidirtodo.R
 import com.davidwhitman.unidirtodo.databinding.HomeBinding
-import com.davidwhitman.unidirtodo.home.business.ActionEmitter
-import com.davidwhitman.unidirtodo.home.business.Actions
 import com.davidwhitman.unidirtodo.home.business.HomeViewModel
 import com.nextfaze.poweradapters.binder
-import com.nextfaze.poweradapters.binding.ListBindingAdapter
+import com.nextfaze.poweradapters.data.Data
+import com.nextfaze.poweradapters.data.DataBindingAdapter
 import com.nextfaze.poweradapters.recyclerview.toRecyclerAdapter
 
 /**
@@ -20,7 +20,8 @@ import com.nextfaze.poweradapters.recyclerview.toRecyclerAdapter
  */
 class HomeActivity : AppCompatActivity() {
     private lateinit var binding: HomeBinding
-    private lateinit var adapter: ListBindingAdapter<TodoItem>
+    private lateinit var adapter: DataBindingAdapter<TodoItem>
+    val data = mutableListOf<TodoItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +32,7 @@ class HomeActivity : AppCompatActivity() {
             this.title.text = todoItem.name
         }
 
-        adapter = ListBindingAdapter(binder)
+        adapter = DataBindingAdapter(binder, Data.fromList { data })
         binding.homeTodoList.adapter = adapter.toRecyclerAdapter()
         binding.homeTodoList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
@@ -40,7 +41,7 @@ class HomeActivity : AppCompatActivity() {
 
         binding.homeNewItem.setOnEditorActionListener { editText, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                viewModel.dispatch(HomeViewModel.TodoUiAction.UpdateTodoItem(name = editText.text.toString()))
+                UiTodoActionEmitter.dispatch(HomeViewModel.TodoUiAction.UpdateTodoItem(name = editText.text.toString()))
                 editText.text = ""
                 true
             } else {
@@ -48,29 +49,42 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        binding.homeLoading.setOnRefreshListener { viewModel.dispatch(HomeViewModel.TodoUiAction.OnRefresh()) }
+        binding.homeLoading.setOnRefreshListener { UiTodoActionEmitter.dispatch(HomeViewModel.TodoUiAction.OnRefresh()) }
 
-        viewModel.dispatch(HomeViewModel.TodoUiAction.OnLoad())
+        UiTodoActionEmitter.dispatch(HomeViewModel.TodoUiAction.OnLoad())
     }
 
     private fun subscribeUiToData(viewModel: HomeViewModel) {
         viewModel.state.observe(this, Observer<HomeState> { newState ->
-            renderUi(newState)
+            renderUi(newState!!)
         })
     }
 
-    private fun renderUi(newState: HomeState?) {
+    private fun renderUi(newState: HomeState) {
         when (newState) {
             is HomeState.Loading -> binding.homeLoading.isRefreshing = true
             is HomeState.Loaded -> {
-                adapter.clear()
-                adapter.addAll(newState.items)
+                val diffResult = DiffUtil.calculateDiff(createDiffCallback(data, newState.items))
+                data.clear()
+                data.addAll(newState.items)
+                diffResult.dispatchUpdatesTo(adapter.toRecyclerAdapter())
                 binding.homeLoading.isRefreshing = false
             }
             is HomeState.Empty -> {
-                adapter.clear()
+                data.clear()
                 binding.homeLoading.isRefreshing = false
             }
         }
+    }
+
+    private fun createDiffCallback(old: List<TodoItem>, new: List<TodoItem>) = object : DiffUtil.Callback() {
+        override fun getOldListSize() = old.size
+
+        override fun getNewListSize() = new.size
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) = old[oldItemPosition] == new[newItemPosition]
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) = old[oldItemPosition].key == new[newItemPosition].key
+
     }
 }

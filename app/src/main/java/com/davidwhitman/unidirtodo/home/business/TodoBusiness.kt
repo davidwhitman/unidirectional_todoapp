@@ -1,9 +1,8 @@
 package com.davidwhitman.unidirtodo.home.business
 
-import android.arch.lifecycle.LiveData
-import com.davidwhitman.unidirtodo.home.UiTodoActionEmitter
 import com.davidwhitman.unidirtodo.home.TodoItem
 import io.reactivex.Completable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -25,22 +24,21 @@ internal object TodoBusiness {
         items = hardcodedItems.map { it.key to it }.toMap().toMutableMap()
     }
 
-    fun doAction(action: TodoAction): LiveData<Action> {
-        when (action) {
+    fun doAction(action: TodoAction): BusinessTodoActionEmitter {
+        val pendingResult: Single<Result> = when (action) {
             is TodoAction.GetTodoList -> {
-                Completable.timer(1, TimeUnit.SECONDS)
+                Completable.timer(2, TimeUnit.SECONDS)
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-                            UiTodoActionEmitter.dispatch(Result.GotTodoList(todoList = items.values.toList()))
-                        }
+                        .toSingleDefault(Result.GotTodoList(todoList = items.values.toList()))
             }
             is TodoAction.UpdateTodoItem -> {
                 items.put(action.key, TodoItem(key = action.key, name = action.name))
-                UiTodoActionEmitter.dispatch(TodoAction.GetTodoList())
+                Single.just(Result.ModifiedTodoList(todoList = items.values.toList()))
             }
         }
 
-        return UiTodoActionEmitter
+        pendingResult.subscribe { result -> BusinessTodoActionEmitter.dispatch(result) }
+        return BusinessTodoActionEmitter
     }
 
     sealed class TodoAction : Action {
@@ -52,5 +50,7 @@ internal object TodoBusiness {
 
     sealed class Result : Action {
         data class GotTodoList(override val description: String = "GotTodoList", val todoList: List<TodoItem>) : Result()
+        data class ModifiedTodoList(override val description: String = "ModifiedTodoList", val todoList: List<TodoItem>) : Result()
+        data class InFlight(override val description: String = "InFlight") : Result()
     }
 }

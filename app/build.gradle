@@ -39,6 +39,7 @@ dependencies {
 
     implementation "com.nextfaze.poweradapters:power-adapters-kotlin:0.15.0"
     implementation "com.nextfaze.poweradapters:power-adapters-recyclerview-v7-kotlin:0.15.0"
+    implementation 'com.nextfaze.poweradapters:power-adapters-data:0.15.0'
     implementation 'com.jakewharton.timber:timber:4.6.0'
 
     testImplementation "junit:junit:4.12"
