@@ -11,7 +11,7 @@ import com.davidwhitman.unidirtodo.databinding.HomeBinding
 import com.davidwhitman.unidirtodo.home.business.HomeViewModel
 
 /**
- * @author Thundercloud Dev on 12/8/2017.
+ * @author David Whitman on 12/8/2017.
  */
 class HomeActivity : AppCompatActivity() {
     private lateinit var binding: HomeBinding

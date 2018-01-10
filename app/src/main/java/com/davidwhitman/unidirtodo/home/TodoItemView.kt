@@ -9,7 +9,7 @@ import android.widget.TextView
 import com.davidwhitman.unidirtodo.databinding.HomeTodoItemBinding
 
 /**
- * @author Thundercloud Dev on 12/10/2017.
+ * @author David Whitman on 12/10/2017.
  */
 class TodoItemView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : CardView(context, attrs, defStyleAttr) {
     private val binding: HomeTodoItemBinding = HomeTodoItemBinding.inflate(LayoutInflater.from(context), this, true)

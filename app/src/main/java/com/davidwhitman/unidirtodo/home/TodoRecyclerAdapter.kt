@@ -8,8 +8,8 @@ import android.view.ViewGroup
 import com.davidwhitman.unidirtodo.databinding.HomeTodoItemBinding
 
 /**
- * Created by dwhitman on 1/10/2018.
- */
+* @author David Whitman on 1/10/2018.
+*/
 internal class TodoRecyclerAdapter(private val context: Context,
                                    initialItems: List<TodoItem> = emptyList()) : RecyclerView.Adapter<TodoRecyclerAdapter.TodoItemViewHolder>() {
     private val items: MutableList<TodoItem> = initialItems.toMutableList()

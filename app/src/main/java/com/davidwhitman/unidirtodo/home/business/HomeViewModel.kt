@@ -10,7 +10,7 @@ import com.davidwhitman.unidirtodo.home.UiTodoActionEmitter
 import java.util.*
 
 /**
- * @author Thundercloud Dev on 12/8/2017.
+ * @author David Whitman on 12/8/2017.
  */
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private var currentState: HomeState = HomeState.Empty()

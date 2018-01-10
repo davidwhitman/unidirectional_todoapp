@@ -8,9 +8,8 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
- * Created by dwhitman on 1/8/2018.
- */
-
+* @author David Whitman on 1/8/2018.
+*/
 internal object TodoBusiness {
 
     private val hardcodedItems = arrayListOf(
