@@ -1,7 +1,7 @@
 package com.davidwhitman.unidirtodo.home.business
 
 import com.davidwhitman.unidirtodo.home.TodoItem
-import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import java.util.*
@@ -25,19 +25,21 @@ internal object TodoBusiness {
     }
 
     fun doAction(action: TodoAction): BusinessTodoActionEmitter {
-        val pendingResult: Single<Result> = when (action) {
+        val actionResults: Observable<Result> = when (action) {
             is TodoAction.GetTodoList -> {
-                Completable.timer(2, TimeUnit.SECONDS)
+                Single.timer(2, TimeUnit.SECONDS)
                         .observeOn(AndroidSchedulers.mainThread())
-                        .toSingleDefault(Result.GotTodoList(todoList = items.values.toList()))
+                        .toObservable()
+                        .map { Result.GotTodoList(todoList = items.values.toList()) as Result }
+                        .startWith(Result.InFlight())
             }
             is TodoAction.UpdateTodoItem -> {
                 items.put(action.key, TodoItem(key = action.key, name = action.name))
-                Single.just(Result.ModifiedTodoList(todoList = items.values.toList()))
+                Observable.just(Result.ModifiedTodoList(todoList = items.values.toList()))
             }
         }
 
-        pendingResult.subscribe { result -> BusinessTodoActionEmitter.dispatch(result) }
+        actionResults.subscribe { result -> BusinessTodoActionEmitter.dispatch(result) }
         return BusinessTodoActionEmitter
     }
 
