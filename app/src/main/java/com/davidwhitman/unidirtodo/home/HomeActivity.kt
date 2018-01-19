@@ -8,7 +8,7 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.view.inputmethod.EditorInfo
 import com.davidwhitman.unidirtodo.databinding.HomeBinding
-import com.davidwhitman.unidirtodo.home.business.HomeViewModel
+import com.jakewharton.rxrelay2.PublishRelay
 
 /**
  * @author David Whitman on 12/8/2017.
@@ -16,7 +16,7 @@ import com.davidwhitman.unidirtodo.home.business.HomeViewModel
 class HomeActivity : AppCompatActivity() {
     private lateinit var binding: HomeBinding
     private lateinit var adapter: TodoRecyclerAdapter
-    val data = mutableListOf<TodoItem>()
+    private val intentions = PublishRelay.create<HomeViewModel.Intention>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +33,7 @@ class HomeActivity : AppCompatActivity() {
 
         binding.homeNewItem.setOnEditorActionListener { editText, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                UiTodoActionEmitter.dispatch(HomeViewModel.TodoUiAction.UpdateTodoItem(name = editText.text.toString()))
+                intentions.accept(HomeViewModel.Intention.UpdateTodoItem(name = editText.text.toString()))
                 editText.text = ""
                 true
             } else {
@@ -41,13 +41,13 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        binding.homeLoading.setOnRefreshListener { UiTodoActionEmitter.dispatch(HomeViewModel.TodoUiAction.OnRefresh()) }
+        binding.homeLoading.setOnRefreshListener { intentions.accept(HomeViewModel.Intention.Refresh()) }
 
-        UiTodoActionEmitter.dispatch(HomeViewModel.TodoUiAction.OnLoad())
+        intentions.accept(HomeViewModel.Intention.Load())
     }
 
     private fun subscribeUiToData(viewModel: HomeViewModel) {
-        viewModel.state.observe(this, Observer<HomeState> { newState ->
+        viewModel.bind(intentions).observe(this, Observer { newState ->
             renderUi(newState!!)
         })
     }
@@ -60,7 +60,7 @@ class HomeActivity : AppCompatActivity() {
                 binding.homeLoading.isRefreshing = false
             }
             is HomeState.Empty -> {
-                data.clear()
+                adapter.swapItems(emptyList())
                 binding.homeLoading.isRefreshing = false
             }
         }
