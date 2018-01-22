@@ -4,7 +4,6 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import android.util.Log
 import com.davidwhitman.unidirtodo.home.business.BusinessTodoActionEmitter
 import com.davidwhitman.unidirtodo.home.business.TodoBusiness
 import com.github.ajalt.timberkt.Timber
@@ -18,20 +17,9 @@ import java.util.*
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private var currentState: HomeState = HomeState.Empty()
     private val stateHistory = mutableMapOf(Date() to currentState)
+    private val liveData = MutableLiveData<HomeState>()
 
-    fun bind(intentions: Observable<Intention>): LiveData<HomeState> {
-        val liveData = MutableLiveData<HomeState>()
-
-        intentions.subscribe { intention ->
-            val actionToTake = when (intention) {
-                is HomeViewModel.Intention.Load,
-                is HomeViewModel.Intention.Refresh -> TodoBusiness.TodoAction.GetTodoList()
-                is HomeViewModel.Intention.UpdateTodoItem -> TodoBusiness.TodoAction.UpdateTodoItem(key = intention.key, name = intention.name)
-            }
-
-            TodoBusiness.doAction(actionToTake)
-        }
-
+    init {
         BusinessTodoActionEmitter.relay
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .map { result -> homeStateReducer(result, currentState) }
@@ -42,6 +30,18 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     stateHistory[Date()] = newState
                     liveData.postValue(newState)
                 }
+    }
+
+    fun bind(intentions: Observable<Intention>): LiveData<HomeState> {
+        intentions.subscribe { intention ->
+            val actionToTake = when (intention) {
+                is HomeViewModel.Intention.Load,
+                is HomeViewModel.Intention.Refresh -> TodoBusiness.TodoAction.GetTodoList()
+                is HomeViewModel.Intention.UpdateTodoItem -> TodoBusiness.TodoAction.UpdateTodoItem(key = intention.key, name = intention.name)
+            }
+
+            TodoBusiness.doAction(actionToTake)
+        }
 
         return liveData
     }
