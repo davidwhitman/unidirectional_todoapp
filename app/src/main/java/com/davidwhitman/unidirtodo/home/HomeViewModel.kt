@@ -7,6 +7,7 @@ import android.arch.lifecycle.MutableLiveData
 import android.util.Log
 import com.davidwhitman.unidirtodo.home.business.BusinessTodoActionEmitter
 import com.davidwhitman.unidirtodo.home.business.TodoBusiness
+import com.github.ajalt.timberkt.Timber
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import java.util.*
@@ -35,6 +36,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .map { result -> homeStateReducer(result, currentState) }
                 .distinctUntilChanged()
+                .doOnNext { Timber.d { it.toString() } }
                 .subscribe { newState ->
                     currentState = newState
                     stateHistory[Date()] = newState
@@ -47,7 +49,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private fun homeStateReducer(result: TodoBusiness.Result, currentState: HomeState): HomeState =
             when (result) {
                 is TodoBusiness.Result.InFlight -> HomeState.Loading()
-                is TodoBusiness.Result.GotTodoList -> HomeState.Loaded(result.todoList)
+                is TodoBusiness.Result.GotTodoList -> HomeState.Loaded(items = result.todoList)
                 is TodoBusiness.Result.ModifiedTodoList -> {
                     TodoBusiness.doAction(TodoBusiness.TodoAction.GetTodoList())
                     HomeState.Loading()

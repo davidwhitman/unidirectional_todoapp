@@ -3,10 +3,10 @@ package com.davidwhitman.unidirtodo.home
 /**
  * @author David Whitman on 12/8/2017.
  */
-sealed class HomeState {
-    class Empty : HomeState()
+sealed class HomeState(open val description: String) {
+    data class Empty(override val description: String = "Empty") : HomeState(description)
 
-    class Loading : HomeState()
+    data class Loading(override val description: String = "Loading") : HomeState(description)
 
-    class Loaded(val items: List<TodoItem>) : HomeState()
+    data class Loaded(override val description: String = "Loaded", val items: List<TodoItem>) : HomeState(description)
 }
