@@ -22,7 +22,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * Takes in a stream of [Intention]s (events from the UI) and returns a [LiveData] that emits state changes.
      * In general, an intention from the UI (eg user clicks on "Refresh") will result in one or more new states
-     * (eg "Loading" and then "
+     * (eg "Loading" and then "Loaded")
      */
     fun bind(incomingIntentions: Observable<Intention>): LiveData<HomeState> =
             MutableLiveData<HomeState>()
