@@ -59,20 +59,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     }
 
     /**
-     * Maps a [TodoAction] to a [TodoBusiness.TodoResult]. For example, maps "get list" to the appropriate function that will get the list.
-     */
-    private val actionToResultTransformer = ObservableTransformer<TodoAction, TodoBusiness.TodoResult>({ actions ->
-        actions.flatMap { action ->
-            when (action) {
-                is TodoAction.GetTodoList -> TodoBusiness.getTodoList()
-                is TodoAction.UpdateTodoItem ->
-                    TodoBusiness.updateTodoItem(TodoItem(action.key, action.name))
-                            .flatMap { TodoBusiness.getTodoList() }
-            }
-        }
-    })
-
-    /**
      * Takes the previous [HomeState] and applies a [TodoBusiness.TodoResult] to it, which results in a new [HomeState].
      * This is a pure function; absolutely no side effects!
      */
