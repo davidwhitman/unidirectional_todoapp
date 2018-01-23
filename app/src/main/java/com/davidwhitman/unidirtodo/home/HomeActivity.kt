@@ -88,10 +88,13 @@ class HomeActivity : AppCompatActivity() {
     /**
      * Binds a [TodoItem] to a [ViewHolder] for the RecyclerView.
      */
-    private data class TodoItemBinder(private val item: TodoItem) : Item<ViewHolder>() {
+    private inner class TodoItemBinder(private val item: TodoItem) : Item<ViewHolder>() {
         override fun getLayout() = R.layout.home_todo_item
         override fun bind(viewHolder: ViewHolder, position: Int) {
             viewHolder.itemView.todo_item_name.text = item.name
+            viewHolder.itemView.todo_item_delete.setOnClickListener { intentions.accept(HomeViewModel.Intention.DeleteItem(item = item)) }
         }
+
+        override fun isSameAs(other: Item<*>?) = other is TodoItemBinder && other.item.key == item.key
     }
 }

@@ -7,6 +7,7 @@ import com.davidwhitman.unidirtodo.home.mapToDb
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -17,7 +18,7 @@ internal object TodoBusiness {
      * Gets a list of items from the database (with artificial 1s delay).
      * Starts with a [TodoResult.InFlight] result and concludes with a [TodoResult.GotTodoList].
      */
-    fun getTodoList(): Observable<TodoResult> = Single.timer(1, TimeUnit.SECONDS)
+    fun getTodoList(): Observable<TodoResult> = Single.timer(Random().nextInt(2).toLong(), TimeUnit.SECONDS)
             .toObservable()
             .map {
                 TodoResult.GotTodoList(todoList = TodoItemDatabase.getInstance().access
@@ -30,6 +31,14 @@ internal object TodoBusiness {
     fun updateTodoItem(item: TodoItem): Observable<TodoResult> =
             Single.create<TodoResult> {
                 TodoItemDatabase.getInstance().access.insertItem(TodoItem(key = item.key, name = item.name).mapToDb())
+                it.onSuccess(TodoResult.ModifiedTodoList())
+            }
+                    .toObservable()
+                    .subscribeOn(Schedulers.io())
+
+    fun deleteItem(item: TodoItem): Observable<TodoResult> =
+            Single.create<TodoResult> {
+                TodoItemDatabase.getInstance().access.deleteItem(item.mapToDb())
                 it.onSuccess(TodoResult.ModifiedTodoList())
             }
                     .toObservable()

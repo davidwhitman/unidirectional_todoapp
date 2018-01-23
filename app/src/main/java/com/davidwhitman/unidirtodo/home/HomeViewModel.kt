@@ -8,7 +8,6 @@ import com.davidwhitman.unidirtodo.home.business.Action
 import com.davidwhitman.unidirtodo.home.business.TodoBusiness
 import com.github.ajalt.timberkt.Timber
 import io.reactivex.Observable
-import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
 import java.util.*
 
@@ -18,45 +17,6 @@ import java.util.*
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private var currentState: HomeState = HomeState.Empty()
     private val stateHistory = mutableMapOf(Date() to currentState)
-
-    /**
-     * Takes in a stream of [Intention]s (events from the UI) and returns a [LiveData] that emits state changes.
-     * In general, an intention from the UI (eg user clicks on "Refresh") will result in one or more new states
-     * (eg "Loading" and then "Loaded")
-     */
-    fun bind(incomingIntentions: Observable<Intention>): LiveData<HomeState> =
-            MutableLiveData<HomeState>()
-                    .apply {
-                        val liveData = this
-
-                        incomingIntentions
-                                .doOnNext { Timber.d { "Intention: $it" } }
-                                .map { intention ->
-                                    when (intention) {
-                                        is HomeViewModel.Intention.Load,
-                                        is HomeViewModel.Intention.Refresh -> TodoAction.GetTodoList()
-                                        is HomeViewModel.Intention.UpdateTodoItem -> TodoAction.UpdateTodoItem(key = intention.key, name = intention.name)
-                                    }
-                                }
-                                .doOnNext { Timber.d { "Action: $it" } }
-                                .flatMap { action ->
-                                    when (action) {
-                                        is TodoAction.GetTodoList -> TodoBusiness.getTodoList()
-                                        is TodoAction.UpdateTodoItem ->
-                                            TodoBusiness.updateTodoItem(TodoItem(action.key, action.name))
-                                                    .flatMap { TodoBusiness.getTodoList() }
-                                    }
-                                }
-                                .doOnNext { Timber.d { "Result: $it" } }
-                                .scan(HomeState.Empty(), homeStateReducer)
-                                .distinctUntilChanged()
-                                .doOnNext { Timber.d { "State: $it" } }
-                                .subscribe { newState ->
-                                    currentState = newState
-                                    stateHistory[Date()] = newState
-                                    liveData.postValue(newState)
-                                }
-                    }
 
     /**
      * Takes the previous [HomeState] and applies a [TodoBusiness.TodoResult] to it, which results in a new [HomeState].
@@ -71,9 +31,54 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
+     * Takes in a stream of [Intention]s (events from the UI) and returns a [LiveData] that emits state changes.
+     * In general, an intention from the UI (eg user clicks on "Refresh") will result in one or more new states
+     * (eg "Loading" and then "Loaded")
+     */
+    internal fun bind(incomingIntentions: Observable<Intention>): LiveData<HomeState> =
+            MutableLiveData<HomeState>()
+                    .apply {
+                        incomingIntentions
+                                .doOnNext { Timber.d { "Intention: $it" } }
+                                .map { intention -> mapIntentionToAction(intention) }
+                                .doOnNext { Timber.d { "Action: $it" } }
+                                .flatMap { action -> mapActionToResult(action) }
+                                .doOnNext { Timber.d { "Result: $it" } }
+                                .scan(HomeState.Empty(), homeStateReducer)
+                                .distinctUntilChanged()
+                                .doOnNext { Timber.d { "State: $it" } }
+                                .subscribe { newState ->
+                                    val liveData = this
+                                    currentState = newState
+                                    stateHistory[Date()] = newState
+                                    liveData.postValue(newState)
+                                }
+                    }
+
+    private fun mapActionToResult(action: TodoAction): Observable<TodoBusiness.TodoResult>? {
+        return when (action) {
+            is TodoAction.GetTodoList -> TodoBusiness.getTodoList()
+            is TodoAction.UpdateTodoItem ->
+                TodoBusiness.updateTodoItem(TodoItem(action.key, action.name))
+                        .flatMap { TodoBusiness.getTodoList() }
+            is TodoAction.DeleteItem -> TodoBusiness.deleteItem(action.item)
+                    .flatMap { TodoBusiness.getTodoList() }
+        }
+    }
+
+    private fun mapIntentionToAction(intention: Intention): TodoAction {
+        return when (intention) {
+            is Intention.Load,
+            is Intention.Refresh -> TodoAction.GetTodoList()
+            is Intention.UpdateTodoItem -> TodoAction.UpdateTodoItem(key = intention.key, name = intention.name)
+            is Intention.DeleteItem -> TodoAction.DeleteItem(item = intention.item)
+        }
+    }
+
+    /**
      * The possible things the UI can do.
      */
-    sealed class Intention {
+    internal sealed class Intention {
         abstract val description: String
 
         data class Load(override val description: String = "Load") : Intention()
@@ -81,6 +86,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         data class UpdateTodoItem(override val description: String = "UpdateTodoItem",
                                   val key: Long = Random().nextLong(),
                                   val name: String) : Intention()
+
+        data class DeleteItem(override val description: String = "DeleteItem",
+                              val item: TodoItem) : Intention()
     }
 
     /**
@@ -91,5 +99,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         data class UpdateTodoItem(override val description: String = "UpdateTodoItem",
                                   val key: Long = Random().nextLong(),
                                   val name: String) : TodoAction()
+
+        data class DeleteItem(override val description: String = "DeleteItem",
+                              val item: TodoItem) : TodoAction()
     }
 }
