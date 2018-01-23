@@ -1,23 +1,21 @@
 package com.davidwhitman.unidirtodo.home
 
-import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.ViewModel
+import com.davidwhitman.unidirtodo.State
+import com.davidwhitman.unidirtodo.StateStore
 import com.davidwhitman.unidirtodo.home.business.Action
 import com.davidwhitman.unidirtodo.home.business.TodoBusiness
 import com.github.ajalt.timberkt.Timber
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import java.util.*
 
 /**
  * @author David Whitman on 12/8/2017.
  */
-class HomeViewModel(application: Application) : AndroidViewModel(application) {
-    private var currentState: HomeState = HomeState.Empty()
-    private val stateHistory = mutableMapOf(Date() to currentState)
-
+class HomeViewModel : ViewModel() {
     /**
      * Takes the previous [HomeState] and applies a [TodoBusiness.TodoResult] to it, which results in a new [HomeState].
      * This is a pure function; absolutely no side effects!
@@ -35,25 +33,20 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
      * In general, an intention from the UI (eg user clicks on "Refresh") will result in one or more new states
      * (eg "Loading" and then "Loaded")
      */
-    internal fun bind(incomingIntentions: Observable<Intention>): LiveData<HomeState> =
-            MutableLiveData<HomeState>()
-                    .apply {
-                        incomingIntentions
-                                .doOnNext { Timber.d { "Intention: $it" } }
-                                .map { intention -> mapIntentionToAction(intention) }
-                                .doOnNext { Timber.d { "Action: $it" } }
-                                .flatMap { action -> mapActionToResult(action) }
-                                .doOnNext { Timber.d { "Result: $it" } }
-                                .scan(HomeState.Empty(), homeStateReducer)
-                                .distinctUntilChanged()
-                                .doOnNext { Timber.d { "State: $it" } }
-                                .subscribe { newState ->
-                                    val liveData = this
-                                    currentState = newState
-                                    stateHistory[Date()] = newState
-                                    liveData.postValue(newState)
-                                }
-                    }
+    internal fun bind(incomingIntentions: Observable<Intention>): LiveData<State> {
+        incomingIntentions
+                .doOnNext { Timber.d { "Intention: $it" } }
+                .map { intention -> mapIntentionToAction(intention) }
+                .doOnNext { Timber.d { "Action: $it" } }
+                .flatMap { action -> mapActionToResult(action) }
+                .doOnNext { Timber.d { "Result: $it" } }
+                .scan(HomeState.Empty(), homeStateReducer)
+                .distinctUntilChanged()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { newState -> StateStore.dispatch({ oldState -> oldState.copy(homeState = newState) }) }
+
+        return StateStore.state
+    }
 
     private fun mapActionToResult(action: TodoAction): Observable<TodoBusiness.TodoResult>? {
         return when (action) {

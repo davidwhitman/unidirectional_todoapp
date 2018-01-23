@@ -8,6 +8,7 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.view.inputmethod.EditorInfo
 import com.davidwhitman.unidirtodo.R
+import com.davidwhitman.unidirtodo.State
 import com.jakewharton.rxrelay2.PublishRelay
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
@@ -71,11 +72,13 @@ class HomeActivity : AppCompatActivity() {
     /**
      * Takes in a new [HomeState] and rearranges the UI based on it (and it alone).
      */
-    private fun renderUi(newState: HomeState) {
-        when (newState) {
+    private fun renderUi(newState: State) {
+        val homeState = newState.homeState
+
+        when (homeState) {
             is HomeState.Loading -> home_loading.isRefreshing = true
             is HomeState.Loaded -> {
-                itemsSection.update(newState.items.map { TodoItemBinder(it) })
+                itemsSection.update(homeState.items.map { TodoItemBinder(it) })
                 home_loading.isRefreshing = false
             }
             is HomeState.Empty -> {
