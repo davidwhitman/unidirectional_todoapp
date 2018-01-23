@@ -95,6 +95,6 @@ class HomeActivity : AppCompatActivity() {
             viewHolder.itemView.todo_item_delete.setOnClickListener { intentions.accept(HomeViewModel.Intention.DeleteItem(item = item)) }
         }
 
-        override fun isSameAs(other: Item<*>?) = other is TodoItemBinder && other.item.key == item.key
+        override fun isSameAs(other: Item<*>) = other is TodoItemBinder && other.item.key == this.item.key
     }
 }
