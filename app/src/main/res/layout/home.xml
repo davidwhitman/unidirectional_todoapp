@@ -1,31 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <EditText
+        android:id="@+id/home_newItem"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:hint="New item..."
+        android:imeOptions="actionDone"
+        android:inputType="text"
+        android:maxLines="1" />
 
-        <EditText
-            android:id="@+id/home_newItem"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/home_loading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/home_todoList"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="New item..."
-            android:imeOptions="actionDone"
-            android:inputType="text"
-            android:maxLines="1" />
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/spacingSmall_half" />
 
-        <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/home_loading"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/home_todoList"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="@dimen/spacingSmall_half" />
-
-        </android.support.v4.widget.SwipeRefreshLayout>
-    </LinearLayout>
-</layout>
+    </android.support.v4.widget.SwipeRefreshLayout>
+</LinearLayout>
