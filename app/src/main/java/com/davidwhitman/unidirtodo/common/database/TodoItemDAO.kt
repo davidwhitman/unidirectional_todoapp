@@ -1,4 +1,4 @@
-package com.davidwhitman.unidirtodo.home.database
+package com.davidwhitman.unidirtodo.common.database
 
 import android.arch.persistence.room.*
 
@@ -6,8 +6,8 @@ import android.arch.persistence.room.*
  * @author David Whitman on 1/18/2018.
  */
 @Dao
-interface TodoItemDatabaseAccess {
-    @Query("SELECT * FROM todoItems")
+interface TodoItemDAO {
+    @Query("SELECT * FROM TodoItems")
     fun getItems(): List<DbTodoItem>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

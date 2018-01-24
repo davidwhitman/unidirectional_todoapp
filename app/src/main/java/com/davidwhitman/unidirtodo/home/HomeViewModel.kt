@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.ViewModel
 import com.davidwhitman.unidirtodo.State
 import com.davidwhitman.unidirtodo.StateStore
+import com.davidwhitman.unidirtodo.common.TodoItem
 import com.davidwhitman.unidirtodo.home.business.Action
 import com.davidwhitman.unidirtodo.home.business.TodoBusiness
 import com.github.ajalt.timberkt.Timber

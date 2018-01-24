@@ -1,7 +1,7 @@
 package com.davidwhitman.unidirtodo
 
 import android.app.Application
-import com.davidwhitman.unidirtodo.home.database.TodoItemDatabase
+import com.davidwhitman.unidirtodo.common.database.AppDatabase
 import com.github.ajalt.timberkt.Timber
 
 /**
@@ -13,6 +13,6 @@ class Application : Application() {
 
         Timber.uprootAll()
         Timber.plant(timber.log.Timber.DebugTree())
-        TodoItemDatabase.createInstance(this)
+        AppDatabase.createInstance(this)
     }
 }

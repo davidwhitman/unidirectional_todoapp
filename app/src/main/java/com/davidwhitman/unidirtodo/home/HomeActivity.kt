@@ -9,6 +9,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.inputmethod.EditorInfo
 import com.davidwhitman.unidirtodo.R
 import com.davidwhitman.unidirtodo.State
+import com.davidwhitman.unidirtodo.common.TodoItem
 import com.jakewharton.rxrelay2.PublishRelay
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item

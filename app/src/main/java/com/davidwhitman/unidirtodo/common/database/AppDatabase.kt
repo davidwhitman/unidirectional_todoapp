@@ -1,4 +1,4 @@
-package com.davidwhitman.unidirtodo.home.database
+package com.davidwhitman.unidirtodo.common.database
 
 import android.arch.persistence.room.Database
 import android.arch.persistence.room.Room
@@ -9,19 +9,19 @@ import android.content.Context
  * @author David Whitman on 1/18/2018.
  */
 @Database(entities = [DbTodoItem::class], version = 1)
-abstract class TodoItemDatabase : RoomDatabase() {
+abstract class AppDatabase : RoomDatabase() {
 
     companion object {
-        private lateinit var INSTANCE: TodoItemDatabase
+        private lateinit var INSTANCE: AppDatabase
 
         fun getInstance() = INSTANCE
 
         fun createInstance(context: Context) {
             INSTANCE = Room.databaseBuilder(context.applicationContext,
-                    TodoItemDatabase::class.java, "TodoItemsDatabase.db")
+                    AppDatabase::class.java, "TodoItemsDatabase.db")
                     .build()
         }
     }
 
-    abstract val access: TodoItemDatabaseAccess
+    abstract val access: TodoItemDAO
 }

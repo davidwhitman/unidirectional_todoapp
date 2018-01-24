@@ -1,9 +1,9 @@
 package com.davidwhitman.unidirtodo.home.business
 
-import com.davidwhitman.unidirtodo.home.TodoItem
-import com.davidwhitman.unidirtodo.home.database.TodoItemDatabase
-import com.davidwhitman.unidirtodo.home.mapFromDb
-import com.davidwhitman.unidirtodo.home.mapToDb
+import com.davidwhitman.unidirtodo.common.TodoItem
+import com.davidwhitman.unidirtodo.common.database.AppDatabase
+import com.davidwhitman.unidirtodo.common.database.mapFromDb
+import com.davidwhitman.unidirtodo.common.database.mapToDb
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
@@ -21,7 +21,7 @@ internal object TodoBusiness {
     fun getTodoList(): Observable<TodoResult> = Single.timer(Random().nextInt(2).toLong(), TimeUnit.SECONDS)
             .toObservable()
             .map {
-                TodoResult.GotTodoList(todoList = TodoItemDatabase.getInstance().access
+                TodoResult.GotTodoList(todoList = AppDatabase.getInstance().access
                         .getItems()
                         .mapFromDb()) as TodoResult
             }
@@ -30,7 +30,7 @@ internal object TodoBusiness {
 
     fun updateTodoItem(item: TodoItem): Observable<TodoResult> =
             Single.create<TodoResult> {
-                TodoItemDatabase.getInstance().access.insertItem(TodoItem(key = item.key, name = item.name).mapToDb())
+                AppDatabase.getInstance().access.insertItem(TodoItem(key = item.key, name = item.name).mapToDb())
                 it.onSuccess(TodoResult.ModifiedTodoList())
             }
                     .toObservable()
@@ -38,7 +38,7 @@ internal object TodoBusiness {
 
     fun deleteItem(item: TodoItem): Observable<TodoResult> =
             Single.create<TodoResult> {
-                TodoItemDatabase.getInstance().access.deleteItem(item.mapToDb())
+                AppDatabase.getInstance().access.deleteItem(item.mapToDb())
                 it.onSuccess(TodoResult.ModifiedTodoList())
             }
                     .toObservable()

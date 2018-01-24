@@ -1,5 +1,7 @@
 package com.davidwhitman.unidirtodo.home
 
+import com.davidwhitman.unidirtodo.common.TodoItem
+
 /**
  * @author David Whitman on 12/8/2017.
  */
