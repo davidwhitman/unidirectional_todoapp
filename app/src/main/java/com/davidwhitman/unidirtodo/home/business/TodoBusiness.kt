@@ -15,15 +15,19 @@ import java.util.concurrent.TimeUnit
  */
 internal object TodoBusiness {
     /**
-     * Gets a list of items from the database (with artificial 1s delay).
+     * Gets a list of items from the database (with artificial delay).
      * Starts with a [TodoResult.InFlight] result and concludes with a [TodoResult.GotTodoList].
      */
     fun getTodoList(): Observable<TodoResult> = Single.timer(Random().nextInt(2).toLong(), TimeUnit.SECONDS)
             .toObservable()
             .map {
-                TodoResult.GotTodoList(todoList = AppDatabase.getInstance().access
-                        .getItems()
-                        .mapFromDb()) as TodoResult
+                if (Random().nextInt(100) < 15) { // Throw an error 15% of the time
+                    TodoResult.ErrorGettingList(exception = RuntimeException("Fake error!"))
+                } else {
+                    TodoResult.GotTodoList(todoList = AppDatabase.getInstance().access
+                            .getItems()
+                            .mapFromDb())
+                }
             }
             .startWith(TodoResult.InFlight())
             .subscribeOn(Schedulers.io())
@@ -43,10 +47,4 @@ internal object TodoBusiness {
             }
                     .toObservable()
                     .subscribeOn(Schedulers.io())
-
-    sealed class TodoResult : com.davidwhitman.unidirtodo.home.business.Result {
-        data class GotTodoList(override val description: String = "GotTodoList", val todoList: List<TodoItem>) : TodoResult()
-        data class ModifiedTodoList(override val description: String = "ModifiedTodoList") : TodoResult()
-        data class InFlight(override val description: String = "InFlight") : TodoResult()
-    }
 }

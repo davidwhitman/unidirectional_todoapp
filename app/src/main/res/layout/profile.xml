@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/profile_icon"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_margin="@dimen/spacingMedium"
+        android:src="@drawable/ic_brightness_4_black_24dp"
+        android:tint="@color/colorAccent"
+        android:tintMode="src_in"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/profile_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacingMedium"
+        android:text="David Whitman"
+        android:textAllCaps="true"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/profile_lists"
+        app:layout_constraintStart_toEndOf="@id/profile_icon"
+        app:layout_constraintTop_toTopOf="@id/profile_icon"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/profile_lists"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacingMedium"
+        android:text="Todo Items:"
+        app:layout_constraintBottom_toBottomOf="@id/profile_icon"
+        app:layout_constraintStart_toEndOf="@id/profile_icon"
+        app:layout_constraintTop_toBottomOf="@id/profile_name"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/profile_lists_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacingTiny"
+        app:layout_constraintBaseline_toBaselineOf="@id/profile_lists"
+        app:layout_constraintStart_toEndOf="@id/profile_lists"
+        tools:text="8" />
+</android.support.constraint.ConstraintLayout>

@@ -2,14 +2,19 @@ package com.davidwhitman.unidirtodo.home
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
+import android.view.Menu
+import android.view.MenuItem
 import android.view.inputmethod.EditorInfo
+import android.widget.Toast
 import com.davidwhitman.unidirtodo.R
-import com.davidwhitman.unidirtodo.State
+import com.davidwhitman.unidirtodo.common.AppState
 import com.davidwhitman.unidirtodo.common.TodoItem
+import com.davidwhitman.unidirtodo.signin.ProfileActivity
 import com.jakewharton.rxrelay2.PublishRelay
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
@@ -55,11 +60,25 @@ class HomeActivity : AppCompatActivity() {
         }
 
         // If the user wants to refresh the list, send an intention to the viewmodel
-        home_loading.setOnRefreshListener { intentions.accept(HomeViewModel.Intention.Refresh()) }
+        home_loading.setOnRefreshListener { intentions.accept(HomeViewModel.Intention.Refresh) }
 
         // Send an intention that the screen wants to load data
-        intentions.accept(HomeViewModel.Intention.Load())
+        intentions.accept(HomeViewModel.Intention.Load)
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?) =
+            when (item?.itemId) {
+                R.id.menu_profile -> {
+                    startActivity(Intent(this, ProfileActivity::class.java))
+                    true
+                }
+                else -> false
+            }
 
     /**
      * Starts sending UI intentions to the [HomeViewModel] and watches for [HomeState] changes.
@@ -73,19 +92,16 @@ class HomeActivity : AppCompatActivity() {
     /**
      * Takes in a new [HomeState] and rearranges the UI based on it (and it alone).
      */
-    private fun renderUi(newState: State) {
+    private fun renderUi(newState: AppState) {
         val homeState = newState.homeState
 
-        when (homeState) {
-            is HomeState.Loading -> home_loading.isRefreshing = true
-            is HomeState.Loaded -> {
-                itemsSection.update(homeState.items.map { TodoItemBinder(it) })
-                home_loading.isRefreshing = false
-            }
-            is HomeState.Empty -> {
-                itemsSection.update(emptyList())
-                home_loading.isRefreshing = false
-            }
+        home_loading.isRefreshing = homeState.refreshing
+
+        itemsSection.update(homeState.items.map { TodoItemBinder(it) })
+
+        homeState.error?.let {
+            Toast.makeText(this, homeState.error, Toast.LENGTH_LONG).show()
+            intentions.accept(HomeViewModel.Intention.DismissError)
         }
     }
 
