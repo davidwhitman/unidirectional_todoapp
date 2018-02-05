@@ -1,6 +1,6 @@
 FROM openjdk:alpine
 
-RUN apk update && apk add git curl wget zip bash
+RUN apk update && apk add curl zip bash
 
 # Install Android SDK
 WORKDIR /usr/local/android-sdk
