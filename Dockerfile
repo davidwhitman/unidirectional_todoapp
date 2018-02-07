@@ -1,6 +1,10 @@
-FROM openjdk:alpine
+FROM openjdk:slim
 
-RUN apk update && apk add curl zip bash
+RUN dpkg --add-architecture i386 \
+ && apt-get update \
+ && apt-get install -y curl zip \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists /var/cache/apt
 
 # Install Android SDK
 WORKDIR /usr/local/android-sdk
@@ -14,6 +18,3 @@ RUN yes | $ANDROID_HOME/tools/bin/sdkmanager "extras;m2repository;com;android;su
 RUN yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
 
 WORKDIR /usr/builder
-COPY . .
-
-RUN ./gradlew assembleDebug
