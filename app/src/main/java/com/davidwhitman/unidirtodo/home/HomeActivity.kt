@@ -44,7 +44,6 @@ class HomeActivity : AppCompatActivity() {
         adapter.add(itemsSection)
 
         home_todoList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-//        home_todoList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         home_todoList.adapter = adapter
 
         // Create a ViewModel and start sending UI intentions to it while watching for state changes
