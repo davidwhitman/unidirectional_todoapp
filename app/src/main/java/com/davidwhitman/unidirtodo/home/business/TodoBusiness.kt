@@ -21,7 +21,7 @@ internal object TodoBusiness {
     fun getTodoList(): Observable<TodoResult> = Single.timer(Random().nextInt(2).toLong(), TimeUnit.SECONDS)
             .toObservable()
             .map {
-                if (Random().nextInt(100) < 15) { // Throw an error 15% of the time
+                if (Random().nextInt(100) < 5) { // Throw an error 5% of the time
                     TodoResult.ErrorGettingList(exception = RuntimeException("Fake error!"))
                 } else {
                     TodoResult.GotTodoList(todoList = AppDatabase.getInstance().access

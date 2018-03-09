@@ -4,14 +4,22 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/home_newItem"
+    <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="New item..."
-        android:imeOptions="actionDone"
-        android:inputType="text"
-        android:maxLines="1" />
+        android:layout_margin="@dimen/spacingSmall">
+
+        <EditText
+            android:id="@+id/home_newItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="New item..."
+            android:layout_marginStart="@dimen/spacingSmall"
+            android:layout_marginEnd="@dimen/spacingSmall"
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            android:maxLines="1" />
+    </android.support.v7.widget.CardView>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/home_loading"

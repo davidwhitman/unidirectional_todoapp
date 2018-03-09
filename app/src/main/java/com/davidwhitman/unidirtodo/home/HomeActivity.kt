@@ -21,6 +21,7 @@ import com.xwray.groupie.Item
 import com.xwray.groupie.Section
 import com.xwray.groupie.ViewHolder
 import io.reactivex.Observable
+import kotlinx.android.synthetic.main.header_item.view.*
 import kotlinx.android.synthetic.main.home.*
 import kotlinx.android.synthetic.main.home_todo_item.view.*
 
@@ -30,7 +31,9 @@ import kotlinx.android.synthetic.main.home_todo_item.view.*
 class HomeActivity : AppCompatActivity() {
     private val intentions = PublishRelay.create<HomeViewModel.Intention>()
 
-    private val itemsSection = Section()
+    private val itemsSection = Section().apply {
+        setHeader(TodoItemHeaderBinder("Items"))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +44,7 @@ class HomeActivity : AppCompatActivity() {
         adapter.add(itemsSection)
 
         home_todoList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        home_todoList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
+//        home_todoList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         home_todoList.adapter = adapter
 
         // Create a ViewModel and start sending UI intentions to it while watching for state changes
@@ -102,6 +105,13 @@ class HomeActivity : AppCompatActivity() {
         homeState.error?.let {
             Toast.makeText(this, homeState.error, Toast.LENGTH_LONG).show()
             intentions.accept(HomeViewModel.Intention.DismissError)
+        }
+    }
+
+    private inner class TodoItemHeaderBinder(private val title: String) : Item<ViewHolder>() {
+        override fun getLayout() = R.layout.header_item
+        override fun bind(viewHolder: ViewHolder, position: Int) {
+            viewHolder.itemView.header_item_text.text = title
         }
     }
 

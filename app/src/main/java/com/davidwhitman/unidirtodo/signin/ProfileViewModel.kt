@@ -14,7 +14,7 @@ import java.util.*
  * @author David Whitman on 1/23/2018.
  */
 class ProfileViewModel : ViewModel() {
-    val user = User(Random().nextLong(), "Test User", listOf(TodoList(emptyList())))
+    private val user = User(Random().nextLong(), "Test User", listOf(TodoList(emptyList())))
 
     private val reducer: BiFunction<ProfileState, in TodoResult, ProfileState> = BiFunction { oldState, result ->
         when (result) {

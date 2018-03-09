@@ -22,7 +22,7 @@ class HomeViewModel : ViewModel() {
      * Takes the previous [HomeState] and applies a [TodoResult] to it, which results in a new [HomeState].
      * This is a pure function; absolutely no side effects!
      */
-    private val homeStateReducer: BiFunction<HomeState, TodoResult, HomeState> = BiFunction { oldState, result ->
+    private val reducer: BiFunction<HomeState, TodoResult, HomeState> = BiFunction { oldState, result ->
         when (result) {
             is TodoResult.InFlight,
             is TodoResult.ModifiedTodoList ->
@@ -48,7 +48,7 @@ class HomeViewModel : ViewModel() {
                 .doOnNext { Timber.d { "Action: $it" } }
                 .flatMap { action -> mapActionToResult(action) }
                 .doOnNext { Timber.d { "Result: $it" } }
-                .scan(HomeState(), homeStateReducer)
+                .scan(HomeState(), reducer)
                 .distinctUntilChanged()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { newState -> StateStore.dispatch({ oldState -> oldState.copy(homeState = newState) }) }
